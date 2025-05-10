@@ -103,7 +103,7 @@ client.on("message", async m => {
     if (senderId.includes('@g.us')) return
 	if (userDebounceTimers.has(senderId)) clearTimeout(userDebounceTimers.get(senderId))
     const about = fs.readFileSync(aboutFilePath, 'utf-8')
-    if (about === 'Not available' || true) {
+    if (about === 'Not available') {
         if (m.type === 'chat') {
             console.log(m.from, m.body)
             const chatHistoryFilePath = path.join(chatsPath, `${m.from.split('@')[0]}.json`)
