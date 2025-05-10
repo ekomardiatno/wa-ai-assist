@@ -9,8 +9,8 @@ import getCountryName from './utils/getCountryName'
 const client = new Client({
     authStrategy: new LocalAuth({ clientId: 'em-waissist' }),
     puppeteer: {
-	headless: true,
-	args: ['--no-sandbox', '--disable-setuid-sandbox']
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
     }
 
 })
@@ -95,17 +95,17 @@ const sendToAi = async (
 
 client.initialize()
 
-const userDebounceTimers: Map<string, NodeJS.timeout> = new Map()
+const userDebounceTimers: Map<string, NodeJS.Timeout> = new Map()
 client.on("message", async m => {
-	const senderId = m.form
-	if(senderId.includes('@g.us)) return
-	if(userDebounceTimers.has(senderId) clearTimeout(userDebounceTimers.get(senderId))
+    const senderId = m.from
+    if (senderId.includes('@g.us')) return
+	if (userDebounceTimers.has(senderId)) clearTimeout(userDebounceTimers.get(senderId))
     const about = fs.readFileSync(aboutFilePath, 'utf-8')
-    if(about === 'Not available' || true) {
-        if(m.type === 'chat') {
-	    console.log(m.from, m.body)
+    if (about === 'Not available' || true) {
+        if (m.type === 'chat') {
+            console.log(m.from, m.body)
             const chatHistoryFilePath = path.join(chatsPath, `${m.from.split('@')[0]}.json`)
-            if(!fs.existsSync(chatHistoryFilePath)) {
+            if (!fs.existsSync(chatHistoryFilePath)) {
                 fs.writeFileSync(chatHistoryFilePath, JSON.stringify(
                     [
                         instructions(`+${m.from.split('@')[0]}`)
@@ -116,34 +116,34 @@ client.on("message", async m => {
                 role: 'system' | 'user' | 'assistant',
                 content: string
             }[] = JSON.parse(fs.readFileSync(chatHistoryFilePath, 'utf-8') ?? '[]')
-            if(chatHistory.length < 1) {
+            if (chatHistory.length < 1) {
                 chatHistory.push(instructions(`+${m.from.split('@')[0]}`))
             }
-	    const latestChat = chatHistory.at(-1)
-	    if(latestChat.role === 'user') {
-		    chatHistory.pop()
-		    chatHistory.push({
-			    role: 'user',
-			    content: `${latestChat.content}\n${m.body}`
-		    })
-	    } else {
-            chatHistory.push({
-                role: 'user',
-                content: m.body
-            })
-	    }
-	    fs.writeFileSync(chatHistoryFilePath, JSON.stringify(chatHistory), 'utf-8')
-	    const timer = setTimeout(() => {
-		    userDebounceTimers.delete(senderId)
-            const aiReply = await sendToAi(chatHistory)
-	    chatHistory.push({
-		    role: 'assistant',
-		    content: aiReply
-	    })
-	    fs.writeFileSync(chatHistoryFilePath, JSON.stringify(chatHistory), 'utf-8')
-            m.reply(aiReply)
-	    }, 8000)
-	    userDebounceTimers.set(senderId, timer);
+            const latestChat = chatHistory.at(-1)
+            if (latestChat?.role === 'user') {
+                chatHistory.pop()
+                chatHistory.push({
+                    role: 'user',
+                    content: `${latestChat.content}\n${m.body}`
+                })
+            } else {
+                chatHistory.push({
+                    role: 'user',
+                    content: m.body
+                })
+            }
+            fs.writeFileSync(chatHistoryFilePath, JSON.stringify(chatHistory), 'utf-8')
+            const timer = setTimeout(async () => {
+                userDebounceTimers.delete(senderId)
+                const aiReply = await sendToAi(chatHistory)
+                chatHistory.push({
+                    role: 'assistant',
+                    content: aiReply
+                })
+                fs.writeFileSync(chatHistoryFilePath, JSON.stringify(chatHistory), 'utf-8')
+                m.reply(aiReply)
+            }, 8000)
+            userDebounceTimers.set(senderId, timer);
         }
     }
 })
