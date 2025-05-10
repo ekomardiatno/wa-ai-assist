@@ -47,9 +47,11 @@ client.on("ready", async () => {
     const contact = await client.getContactById(numberId)
     const about = await contact.getAbout()
     console.log(numberId, contact, about)
-    fs.writeFileSync(aboutFilePath, about || '', {
-        encoding: 'utf-8'
-    })
+    if(about) {
+        fs.writeFileSync(aboutFilePath, about || '', {
+            encoding: 'utf-8'
+        })
+    }
 });
 
 
@@ -154,6 +156,11 @@ client.on("message", async m => {
 app.listen(PORT, () => {
     if (!fs.existsSync(chatsPath)) {
         fs.mkdirSync(chatsPath)
+    }
+    if(!fs.existsSync(aboutFilePath)) {
+        fs.writeFileSync(aboutFilePath, '', {
+            encoding: 'utf-8'
+        })
     }
     console.log('App running on:', PORT)
 })
