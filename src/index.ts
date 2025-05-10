@@ -60,13 +60,19 @@ client.on("authenticated", () => {
 });
 
 app.use("/", async (req, res) => {
-    const response = await sendToAi([
-        {
-            role: 'user',
-            content: "Hello"
-        }
-    ])
-    res.json(response)
+    res.json('hello world!')
+})
+
+app.use('/activate-ai', async (req, res) => {
+    await client.setStatus('Not available')
+    res.send('AI Assistant is activated')
+    fs.writeFileSync(aboutFilePath, 'Not available', 'utf-8')
+})
+
+app.use('/deactivate-ai', async (req, res) => {
+    await client.setStatus('Available')
+    res.send('AI Assistant is deactivated')
+    fs.writeFileSync(aboutFilePath, 'Available', 'utf-8')
 })
 
 const sendToAi = async (
