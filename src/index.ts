@@ -68,8 +68,8 @@ const sendToAi = async (
     }[]
 ): Promise<string> => {
     try {
-        const response = await axios.post("http://103.245.38.118:11435/api/chat", {
-            model: "deepseek-r1:1.5b",
+        const response = await axios.post(`${process.env.OLLAMA_HOST}/api/chat`, {
+            model: process.env.OLLAMA_MODEL,
             messages: messages,
             stream: false
         }, {
