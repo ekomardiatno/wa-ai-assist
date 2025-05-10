@@ -133,17 +133,20 @@ client.on("message", async m => {
                 })
             }
             fs.writeFileSync(chatHistoryFilePath, JSON.stringify(chatHistory), 'utf-8')
-            const timer = setTimeout(async () => {
-                userDebounceTimers.delete(senderId)
-                const aiReply = await sendToAi(chatHistory)
-                chatHistory.push({
-                    role: 'assistant',
-                    content: aiReply
-                })
-                fs.writeFileSync(chatHistoryFilePath, JSON.stringify(chatHistory), 'utf-8')
-                m.reply(aiReply)
-            }, 8000)
-            userDebounceTimers.set(senderId, timer);
+            const latestChat2 = chatHistory.at(-1)
+            if(latestChat2?.role === 'user') {
+                const timer = setTimeout(async () => {
+                    userDebounceTimers.delete(senderId)
+                    const aiReply = await sendToAi(chatHistory)
+                    chatHistory.push({
+                        role: 'assistant',
+                        content: aiReply
+                    })
+                    fs.writeFileSync(chatHistoryFilePath, JSON.stringify(chatHistory), 'utf-8')
+                    m.reply(aiReply)
+                }, 8000)
+                userDebounceTimers.set(senderId, timer);
+            }
         }
     }
 })
