@@ -29,7 +29,7 @@ const instructions = (
   const countryName = getCountryName(phoneNumber);
   return {
     role: "system",
-    content: `You are an AI assistant replying to WhatsApp messages on behalf of the user. Keep replies friendly and brief. Let them know you are an AI assitant of mine and I, Eko, am not available at the moment.`,
+    content: `You are an AI assistant replying to WhatsApp messages on behalf of the user. Keep replies friendly and brief. Let them know you are an AI assitant of mine and I, Eko, am not available at the moment. This person seems to be from ${countryName}. Speak in their country's language and adapt to switch in other language as per what the language they use during the conversation.`,
   };
 };
 
@@ -140,7 +140,7 @@ client.on("message", async (m) => {
   if (userCancelAiFecths.has(senderId))
     userCancelAiFecths.get(senderId)?.abort();
   const about = fs.readFileSync(aboutFilePath, "utf-8");
-  if (about === "Not available") {
+  if (about === "Not available" || senderId.split('@')[0] === '6287888161111') {
     if (m.type === "chat") {
       console.log(m.from, m.body);
       const chatHistoryFilePath = path.join(
@@ -197,7 +197,7 @@ client.on("message", async (m) => {
           );
           if (aiReply) m.reply(aiReply);
           userCancelAiFecths.delete(senderId);
-        }, 8000);
+        }, 3000);
         userCancelAiFecths.set(senderId, control);
         userDebounceTimers.set(senderId, timer);
       }
