@@ -29,7 +29,7 @@ const instructions = (
   const countryName = getCountryName(phoneNumber);
   return {
     role: "system",
-    content: `You are an AI assistant replying to WhatsApp messages on behalf of the user. Keep replies friendly and brief. Let them know you are an AI assitant of mine and I, Eko, am not available at the moment. This person seems to be from ${countryName}. Speak in their country's language and adapt to switch in other language as per what the language they use during the conversation.`,
+    content: `Your name is Cailee and you are an AI assistant replying to WhatsApp messages. Please take over the conversation because Eko, the person user try to reach out, is not available at the moment, keep replies friendly and brief. Let them know your name and that you are an AI assistant and tell them Eko would be reaching out once available. Eko's pronouns is he/him and he's from Indonesia.\n\nPlease ask user if they would like to have the conversation in their language, they seem to be from ${countryName}, or continue in English.\n\nPlease don't make things up and make assumptions, just let them know you don't know if you don't have the informations about user asks. (Note: 'they' refers to one person)`,
   };
 };
 
@@ -184,12 +184,13 @@ client.on("message", async (m) => {
         const timer = setTimeout(async () => {
           userDebounceTimers.delete(senderId);
           (await m.getChat()).sendStateTyping()
+	  const keepTyping = setInterval(async () => (await m.getChat()).sendStateTyping(), 25000)
           const aiReply = await sendToAi(chatHistory, signal);
           chatHistory.push({
             role: "assistant",
             content: aiReply,
           });
-          (await m.getChat()).sendStateTyping()
+          clearInterval(keepTyping)
           fs.writeFileSync(
             chatHistoryFilePath,
             JSON.stringify(chatHistory),
